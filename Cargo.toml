@@ -8,7 +8,7 @@ repository = "https://github.com/Nick-154/batchline"
 readme = "README.md"
 
 [dependencies]
-onyx = { git = "file:///home/claude/onyx" }
+onyx = { git = "https://github.com/Nick-154/onyx" }
 tokio = { version = "1", features = ["rt-multi-thread", "macros", "net", "sync", "time", "signal", "io-util"] }
 axum = { version = "0.8", default-features = false, features = ["http1", "tokio"] }
 serde = { version = "1", features = ["derive"] }
