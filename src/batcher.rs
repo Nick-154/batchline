@@ -183,7 +183,9 @@ async fn batch_loop(
         // has dropped its receiver. Do not spend model time on it.
         let before = batch.len();
         batch.retain(|job| !job.reply.is_closed());
-        metrics.requests_cancelled.fetch_add((before - batch.len()) as u64, Relaxed);
+        metrics
+            .requests_cancelled
+            .fetch_add((before - batch.len()) as u64, Relaxed);
         if batch.is_empty() {
             continue;
         }
@@ -381,7 +383,10 @@ mod tests {
         let started = std::time::Instant::now();
         let refused = batcher.infer(vec![0.0, 0.0]).await;
         assert_eq!(refused, Err(InferError::Overloaded));
-        assert!(started.elapsed() < Duration::from_millis(20), "refusal must not wait");
+        assert!(
+            started.elapsed() < Duration::from_millis(20),
+            "refusal must not wait"
+        );
         assert_eq!(metrics.requests_rejected.load(Relaxed), 1);
         for call in accepted {
             call.await.unwrap().unwrap(); // the accepted ones still complete
@@ -436,7 +441,17 @@ mod tests {
         queued[0].abort();
         queued[1].abort();
         running.await.unwrap().unwrap();
-        assert_eq!(queued.into_iter().last().unwrap().await.unwrap().unwrap().batch_size, 1);
+        assert_eq!(
+            queued
+                .into_iter()
+                .last()
+                .unwrap()
+                .await
+                .unwrap()
+                .unwrap()
+                .batch_size,
+            1
+        );
         assert_eq!(*model.batches.lock().unwrap(), vec![1, 1]);
         assert_eq!(metrics.requests_cancelled.load(Relaxed), 2);
     }

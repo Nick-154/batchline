@@ -52,7 +52,9 @@ impl Histogram {
     }
 }
 
-const SECONDS: &[f64] = &[0.0005, 0.001, 0.0025, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5];
+const SECONDS: &[f64] = &[
+    0.0005, 0.001, 0.0025, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5,
+];
 const BATCH_SIZES: &[f64] = &[1.0, 2.0, 4.0, 8.0, 16.0, 32.0, 64.0, 128.0];
 
 pub struct Metrics {
@@ -135,7 +137,8 @@ impl Metrics {
              batchline_queue_depth {}",
             self.queue_depth.load(Relaxed)
         );
-        self.batch_size.render("batchline_batch_size", "Requests per executed batch.", &mut out);
+        self.batch_size
+            .render("batchline_batch_size", "Requests per executed batch.", &mut out);
         self.queue_wait.render(
             "batchline_queue_wait_seconds",
             "Time a request waited before its batch started.",
