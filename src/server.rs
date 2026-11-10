@@ -67,8 +67,10 @@ async fn infer(State(state): State<AppState>, headers: HeaderMap, body: Bytes) -
                 "binary body must be a whole number of f32 values",
             );
         }
-        body.chunks_exact(4)
-            .map(|c| f32::from_le_bytes(c.try_into().unwrap()))
+        body.as_chunks::<4>()
+            .0
+            .iter()
+            .map(|c| f32::from_le_bytes(*c))
             .collect()
     } else {
         match serde_json::from_slice::<InferRequest>(&body) {
