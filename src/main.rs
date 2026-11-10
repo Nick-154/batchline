@@ -17,7 +17,8 @@ struct Args {
     #[arg(long, default_value_t = 32)]
     max_batch: usize,
     /// Longest a request waits for others to join its batch, in milliseconds.
-    #[arg(long, default_value_t = 2.0)]
+    /// 0 batches only what queued while the previous batch was running.
+    #[arg(long, default_value_t = 0.0)]
     max_delay_ms: f64,
     /// Requests allowed to wait before new ones get 503.
     #[arg(long, default_value_t = 256)]

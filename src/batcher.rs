@@ -13,7 +13,8 @@
 //!   while the previous batch is running, their deadline has usually
 //!   passed by the time the model is free, and the next batch is simply
 //!   everything that queued in the meantime. Batch size grows with load
-//!   on its own.
+//!   on its own. With `max_delay` set to zero this is the only way
+//!   batches form.
 //!
 //! The queue is bounded. When it is full, new requests are refused
 //! immediately instead of being left to wait: a fast "try again" is more
@@ -51,7 +52,7 @@ impl Default for BatchConfig {
     fn default() -> Self {
         BatchConfig {
             max_batch: 32,
-            max_delay: Duration::from_millis(2),
+            max_delay: Duration::ZERO,
             queue_capacity: 256,
         }
     }
@@ -169,9 +170,22 @@ async fn batch_loop(
         let deadline = first.enqueued + config.max_delay;
         let mut batch = vec![first];
         while batch.len() < config.max_batch {
-            // `timeout_at` polls `recv` before it checks the clock, so jobs
-            // that are already queued are taken even if the deadline has
-            // passed. Only an empty queue makes the deadline matter.
+            // Take whatever is already queued without touching the clock.
+            match jobs.try_recv() {
+                Ok(job) => {
+                    batch.push(job);
+                    continue;
+                }
+                Err(mpsc::error::TryRecvError::Disconnected) => break,
+                Err(mpsc::error::TryRecvError::Empty) => {}
+            }
+            // The queue is empty. Wait for more only if the oldest request
+            // still has time left. This check matters: tokio timers have
+            // millisecond resolution, so asking for a timeout that has
+            // already expired would still cost up to a millisecond.
+            if Instant::now() >= deadline {
+                break;
+            }
             match timeout_at(deadline, jobs.recv()).await {
                 Ok(Some(job)) => batch.push(job),
                 Ok(None) | Err(_) => break, // all senders gone, or time is up
