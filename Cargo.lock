@@ -374,7 +374,7 @@ checksum = "384b8ab6d37215f3c5301a95a4accb5d64aa607f1fcb26a11b5303878451b4fe"
 [[package]]
 name = "onyx"
 version = "0.1.0"
-source = "git+https://github.com/Nick-154/onyx#3fecee78605fc922772e8eef5448544f68436f27"
+source = "git+https://github.com/Nick-154/onyx#3fba1c793e9dca97b2d0cec2ac9eaa037b6b5ea3"
 dependencies = [
  "rayon",
 ]
